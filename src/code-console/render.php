@@ -33,7 +33,7 @@ if ( empty( $tabs ) ) {
 					data-tab-index="<?php echo esc_attr( $index ); ?>"
 					aria-selected="<?php echo 0 === $index ? 'true' : 'false'; ?>"
 				>
-					<?php echo esc_html( $tab['title'] ?: 'file.txt' ); ?>
+					<?php echo esc_html( esc_html($tab['title'] )?: 'file.txt' ); ?>
 				</button>
 			<?php endforeach; ?>
 		</div>
