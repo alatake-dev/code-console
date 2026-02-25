@@ -1,20 +1,30 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
-	"name": "create-block/code-console",
-	"version": "0.1.0",
+	"name": "triskelion/code-console",
+	"version": "1.0.0",
 	"title": "Code Console",
-	"category": "widgets",
-	"icon": "smiley",
-	"description": "Example block scaffolded with Create Block tool.",
-	"example": {},
-	"supports": {
-		"html": false
+	"category": "formatting",
+	"icon": "terminal",
+	"description": "Terminal con pestañas para documentación técnica.",
+	"attributes": {
+		"tabs": {
+			"type": "array",
+			"default": [
+				{ "title": "index.js", "language": "javascript", "content": "" }
+			]
+		},
+		"activeTabIndex": {
+			"type": "number",
+			"default": 0
+		}
 	},
-	"textdomain": "code-console",
+	"supports": {
+		"html": false,
+		"anchor": true
+	},
 	"editorScript": "file:./index.js",
-	"editorStyle": "file:./index.css",
+	"editorStyle": "file:./editor.css",
 	"style": "file:./style-index.css",
-	"render": "file:./render.php",
-	"viewScript": "file:./view.js"
+	"render": "file:./render.php"
 }

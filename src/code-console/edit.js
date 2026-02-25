@@ -1,38 +1,97 @@
-/**
- * Retrieves the translation of text.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-i18n/
- */
 import { __ } from '@wordpress/i18n';
-
-/**
- * React hook that is used to mark the block wrapper element.
- * It provides all the necessary props like the class name.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
- */
-import { useBlockProps } from '@wordpress/block-editor';
-
-/**
- * Lets webpack process CSS, SASS or SCSS files referenced in JavaScript files.
- * Those files can contain any CSS code that gets applied to the editor.
- *
- * @see https://www.npmjs.com/package/@wordpress/scripts#using-css
- */
+import {
+	useBlockProps,
+	InspectorControls,
+	RichText
+} from '@wordpress/block-editor';
+import {
+	PanelBody,
+	SelectControl,
+	Button,
+	Dashicon
+} from '@wordpress/components';
 import './editor.scss';
 
-/**
- * The edit function describes the structure of your block in the context of the
- * editor. This represents what the editor will render when the block is used.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-edit-save/#edit
- *
- * @return {Element} Element to render.
- */
-export default function Edit() {
+export default function Edit( { attributes, setAttributes } ) {
+	const { tabs, activeTabIndex } = attributes;
+
+	const updateTab = ( key, value, index ) => {
+		const newTabs = [ ...tabs ];
+		newTabs[ index ] = { ...newTabs[ index ], [ key ]: value };
+		setAttributes( { tabs: newTabs } );
+	};
+
+	const addTab = () => {
+		setAttributes( {
+			tabs: [ ...tabs, { title: 'file.txt', language: 'javascript', content: '' } ],
+			activeTabIndex: tabs.length
+		} );
+	};
+
+	const removeTab = ( index ) => {
+		const newTabs = tabs.filter( ( _, i ) => i !== index );
+		setAttributes( {
+			tabs: newTabs,
+			activeTabIndex: Math.max( 0, index - 1 )
+		} );
+	};
+
 	return (
-		<p { ...useBlockProps() }>
-			{ __( 'Code Console – hello from the editor!', 'code-console' ) }
-		</p>
+		<div { ...useBlockProps() }>
+			<InspectorControls>
+				<PanelBody title={ __( 'Configuración de Pestaña', 'code-console' ) }>
+					<SelectControl
+						label={ __( 'Lenguaje', 'code-console' ) }
+						value={ tabs[ activeTabIndex ]?.language }
+						options={ [
+							{ label: 'JavaScript', value: 'javascript' },
+							{ label: 'Java', value: 'java' },
+							{ label: 'PHP', value: 'php' },
+							{ label: 'Python', value: 'python' },
+							{ label: 'CSS', value: 'css' },
+						] }
+						onChange={ ( val ) => updateTab( 'language', val, activeTabIndex ) }
+					/>
+					<Button
+						isDestructive
+						variant="link"
+						onClick={ () => removeTab( activeTabIndex ) }
+						disabled={ tabs.length <= 1 }
+					>
+						{ __( 'Eliminar pestaña actual', 'code-console' ) }
+					</Button>
+				</PanelBody>
+			</InspectorControls>
+
+			<div className="tk-console-admin">
+				<div className="tk-console-tabs-row">
+					{ tabs.map( ( tab, i ) => (
+						<button
+							key={ i }
+							className={ `tk-tab-btn ${ activeTabIndex === i ? 'is-active' : '' }` }
+							onClick={ () => setAttributes( { activeTabIndex: i } ) }
+						>
+							<RichText
+								tagName="span"
+								value={ tab.title }
+								onChange={ ( val ) => updateTab( 'title', val, i ) }
+								placeholder={ __( 'nombre.ext', 'code-console' ) }
+							/>
+						</button>
+					) ) }
+					<Button onClick={ addTab } className="add-tab-btn"><Dashicon icon="plus" /></Button>
+				</div>
+
+				<div className="tk-console-content-edit">
+					<RichText
+						tagName="pre"
+						value={ tabs[ activeTabIndex ]?.content }
+						onChange={ ( val ) => updateTab( 'content', val, activeTabIndex ) }
+						placeholder={ __( 'Pega tu código aquí...', 'code-console' ) }
+						preserveWhiteSpace={ true }
+					/>
+				</div>
+			</div>
+		</div>
 	);
 }
