@@ -63,13 +63,17 @@ export default function Edit( { attributes, setAttributes } ) {
 						label={ __( 'Lenguaje' ) }
 						value={ tabs[ activeTabIndex ]?.language || 'javascript' }
 						options={ [
+							{ label: 'Bash', value: 'bash' },
+							{ label: 'CSS', value: 'css' },
+							{ label: 'HTML', value: 'markup' }, // Prism usa 'markup' para HTML
+							{ label: 'Java', value: 'java' },
 							{ label: 'JavaScript', value: 'javascript' },
+							{ label: 'JSON', value: 'json' },
 							{ label: 'PHP', value: 'php' },
 							{ label: 'Python', value: 'python' },
-							{ label: 'Java', value: 'java' },
-							{ label: 'CSS', value: 'css' },
-							{ label: 'HTML', value: 'html' },
-							{ label: 'Bash', value: 'bash' },
+							{ label: 'SQL', value: 'sql' },
+							{ label: 'TypeScript', value: 'typescript' },
+							{ label: 'YAML', value: 'yaml' },
 						] }
 						onChange={ ( val ) => updateTab( 'language', val, activeTabIndex ) }
 					/>
