@@ -12,14 +12,17 @@
 		"lint:js": "wp-scripts lint-js",
 		"packages-update": "wp-scripts packages-update",
 		"plugin-zip": "wp-scripts plugin-zip",
-		"start": "wp-scripts start --webpack-copy-php --blocks-manifest"
+		"start": "wp-scripts start --webpack-copy-php --blocks-manifest",
+		"bundle": "npm run build && npm run plugin-zip"
 	},
 	"dependencies": {
-		"@wordpress/block-editor": "latest",
 		"@wordpress/blocks": "latest",
-		"@wordpress/i18n": "latest"
+		"@wordpress/icons": "^11.7.0"
 	},
 	"devDependencies": {
+		"@wordpress/block-editor": "^15.13.1",
+		"@wordpress/components": "^32.2.0",
+		"@wordpress/i18n": "^6.13.0",
 		"@wordpress/scripts": "^31.5.0"
 	}
 }

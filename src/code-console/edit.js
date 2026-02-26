@@ -1,19 +1,20 @@
 import { __ } from '@wordpress/i18n';
 import {
 	useBlockProps,
+	RichText,
 	InspectorControls,
-	RichText
+	PlainText
 } from '@wordpress/block-editor';
 import {
 	PanelBody,
 	SelectControl,
 	Button,
-	Dashicon
+	ButtonGroup // Nuevo componente para agrupar botones
 } from '@wordpress/components';
-import './editor.scss';
 
 export default function Edit( { attributes, setAttributes } ) {
 	const { tabs, activeTabIndex } = attributes;
+	const blockProps = useBlockProps( { className: 'tk-console-admin' } );
 
 	const updateTab = ( key, value, index ) => {
 		const newTabs = [ ...tabs ];
@@ -22,75 +23,125 @@ export default function Edit( { attributes, setAttributes } ) {
 	};
 
 	const addTab = () => {
-		setAttributes( {
-			tabs: [ ...tabs, { title: 'file.txt', language: 'javascript', content: '' } ],
-			activeTabIndex: tabs.length
-		} );
+		const newTabs = [ ...tabs, {
+			title: '',
+			language: 'javascript',
+			content: ''
+		} ];
+		setAttributes( { tabs: newTabs, activeTabIndex: newTabs.length - 1 } );
 	};
 
 	const removeTab = ( index ) => {
+		if ( tabs.length <= 1 ) return;
 		const newTabs = tabs.filter( ( _, i ) => i !== index );
+		const newIndex = activeTabIndex >= newTabs.length ? newTabs.length - 1 : activeTabIndex;
+		setAttributes( { tabs: newTabs, activeTabIndex: Math.max( 0, newIndex ) } );
+	};
+
+	// Función para mover pestañas
+	const moveTab = ( direction ) => {
+		const newIndex = direction === 'up' ? activeTabIndex - 1 : activeTabIndex + 1;
+
+		// Verificamos límites
+		if ( newIndex < 0 || newIndex >= tabs.length ) return;
+
+		const newTabs = [ ...tabs ];
+		// Intercambio de posiciones
+		[ newTabs[ activeTabIndex ], newTabs[ newIndex ] ] = [ newTabs[ newIndex ], newTabs[ activeTabIndex ] ];
+
 		setAttributes( {
 			tabs: newTabs,
-			activeTabIndex: Math.max( 0, index - 1 )
+			activeTabIndex: newIndex // Seguimos a la pestaña movida
 		} );
 	};
 
 	return (
-		<div { ...useBlockProps() }>
+		<div { ...blockProps }>
 			<InspectorControls>
 				<PanelBody title={ __( 'Configuración de Pestaña', 'code-console' ) }>
 					<SelectControl
-						label={ __( 'Lenguaje', 'code-console' ) }
-						value={ tabs[ activeTabIndex ]?.language }
+						label={ __( 'Lenguaje' ) }
+						value={ tabs[ activeTabIndex ]?.language || 'javascript' }
 						options={ [
 							{ label: 'JavaScript', value: 'javascript' },
-							{ label: 'Java', value: 'java' },
 							{ label: 'PHP', value: 'php' },
 							{ label: 'Python', value: 'python' },
+							{ label: 'Java', value: 'java' },
 							{ label: 'CSS', value: 'css' },
+							{ label: 'HTML', value: 'html' },
+							{ label: 'Bash', value: 'bash' },
 						] }
 						onChange={ ( val ) => updateTab( 'language', val, activeTabIndex ) }
 					/>
+
+					<div style={ { marginBottom: '20px' } }>
+						<label className="components-base-control__label" style={ { display: 'block', marginBottom: '8px' } }>
+							{ __( 'Orden de pestaña' ) }
+						</label>
+						<ButtonGroup>
+							<Button
+								variant="secondary"
+								icon="arrow-up-alt2"
+								onClick={ () => moveTab( 'up' ) }
+								disabled={ activeTabIndex === 0 }
+								label={ __( 'Mover arriba/izquierda' ) }
+							/>
+							<Button
+								variant="secondary"
+								icon="arrow-down-alt2"
+								onClick={ () => moveTab( 'down' ) }
+								disabled={ activeTabIndex === tabs.length - 1 }
+								label={ __( 'Mover abajo/derecha' ) }
+							/>
+						</ButtonGroup>
+					</div>
+
+					<hr />
+
 					<Button
 						isDestructive
 						variant="link"
 						onClick={ () => removeTab( activeTabIndex ) }
 						disabled={ tabs.length <= 1 }
+						style={ { padding: 0 } }
 					>
-						{ __( 'Eliminar pestaña actual', 'code-console' ) }
+						{ __( 'Eliminar pestaña actual' ) }
 					</Button>
 				</PanelBody>
 			</InspectorControls>
 
-			<div className="tk-console-admin">
-				<div className="tk-console-tabs-row">
+			<div className="tk-console-header">
+				<div className="tk-console-tabs-nav">
 					{ tabs.map( ( tab, i ) => (
-						<button
-							key={ i }
-							className={ `tk-tab-btn ${ activeTabIndex === i ? 'is-active' : '' }` }
-							onClick={ () => setAttributes( { activeTabIndex: i } ) }
-						>
-							<RichText
-								tagName="span"
-								value={ tab.title }
-								onChange={ ( val ) => updateTab( 'title', val, i ) }
-								placeholder={ __( 'nombre.ext', 'code-console' ) }
-							/>
-						</button>
+						<div key={ i } className={ `tk-tab-wrapper ${ activeTabIndex === i ? 'is-active' : '' }` }>
+							<button
+								className="tk-tab-select"
+								onClick={ ( e ) => { e.preventDefault(); setAttributes( { activeTabIndex: i } ); } }
+							>
+								<RichText
+									tagName="span"
+									value={ tab.title }
+									onChange={ ( val ) => updateTab( 'title', val, i ) }
+									placeholder={ __( 'nombre.ext' ) }
+									allowedFormats={ [] }
+								/>
+							</button>
+						</div>
 					) ) }
-					<Button onClick={ addTab } className="add-tab-btn"><Dashicon icon="plus" /></Button>
+					<Button onClick={ addTab } icon="plus" isSmall className="tk-add-tab-btn" />
 				</div>
+			</div>
 
-				<div className="tk-console-content-edit">
-					<RichText
-						tagName="pre"
-						value={ tabs[ activeTabIndex ]?.content }
-						onChange={ ( val ) => updateTab( 'content', val, activeTabIndex ) }
-						placeholder={ __( 'Pega tu código aquí...', 'code-console' ) }
-						preserveWhiteSpace={ true }
-					/>
+			<div className="tk-console-body">
+				<div className="tk-admin-lang-indicator">
+					{ (tabs[ activeTabIndex ]?.language || 'js').toUpperCase() }
 				</div>
+				<PlainText
+					value={ tabs[ activeTabIndex ]?.content }
+					onChange={ ( val ) => updateTab( 'content', val, activeTabIndex ) }
+					placeholder={ __( '// Pega tu código aquí...' ) }
+					className="tk-code-plain-area"
+				/>
 			</div>
 		</div>
 	);

@@ -1,62 +1,76 @@
+/* Selector de Bloque oficial + Clase personalizada */
 .tk-console-wrapper {
-	background: #2b2b2b;
-	border-radius: 12px;
-	overflow: hidden; // Candado contra el scroll de página
+	background: #1e1e1e;
+	border-radius: 8px;
+	overflow: hidden;
 	margin: 2em 0;
-	box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-	width: 100% !important;
-	max-width: 100% !important;
-	box-sizing: border-box;
+	width: 100%;
+	max-width: 100%;
 
-	.tk-console-nav {
-		background: #1e1e1e;
+	.tk-console-header {
+		background: #323232;
+		padding: 10px 15px;
 		display: flex;
 		align-items: center;
-		padding: 0 15px;
-		height: 48px;
-		border-bottom: 1px solid rgba(0,0,0,0.2);
+
+		.tk-console-dots {
+			display: flex;
+			gap: 6px;
+			margin-right: 15px;
+			.tk-dot {
+				width: 12px;
+				height: 12px;
+				border-radius: 50%;
+				&.red { background: #ff5f56; }
+				&.yellow { background: #ffbd2e; }
+				&.green { background: #27c93f; }
+			}
+		}
 	}
 
-	.tk-console-dots {
+	.tk-console-tabs-nav {
 		display: flex;
-		gap: 8px;
-		margin-right: 40px;
-		.tk-dot {
-			width: 10px; height: 10px; border-radius: 50%;
-			&.red { background: #ff5f56; }
-			&.yellow { background: #ffbd2e; }
-			&.green { background: #27c93f; }
-		}
-	}
-
-	.tk-console-tab-list {
-		display: flex; height: 100%; align-items: flex-end;
+		gap: 2px;
 		overflow-x: auto;
-		scrollbar-width: none;
-		&::-webkit-scrollbar { display: none; }
-	}
 
-	.tk-console-tab {
-		background: transparent; border: none; color: rgba(255,255,255,0.4);
-		padding: 0 20px; font-size: 11px; height: 38px; cursor: pointer;
-		border-radius: 6px 6px 0 0; transition: 0.2s;
-		&.is-active {
-			background: #272822; color: #fff;
-			box-shadow: inset 0 3px 0 #ffbd2e;
+		.tk-tab-item {
+			background: #3c3c3c;
+			color: #aaa;
+			border: none;
+			padding: 8px 15px;
+			font-size: 13px;
+			cursor: pointer;
+			&.is-active {
+				background: #1e1e1e;
+				color: #fff;
+			}
 		}
 	}
 
-	.tk-console-scroll-container {
-		overflow-x: auto; // Solo aquí se permite el scroll horizontal
-		width: 100%;
-		background: #272822;
-		max-height: 500px;
-	}
+	.tk-console-body {
+		position: relative;
 
-	pre[class*="language-"] {
-		margin: 0 !important;
-		padding: 20px !important;
-		width: max-content; // El código define su ancho, pero el contenedor lo scrollea
-		min-width: 100%;
+		.tk-console-info {
+			padding: 10px 15px 0;
+			text-align: right;
+			.tk-lang-badge {
+				color: #666;
+				font-size: 11px;
+				font-weight: bold;
+			}
+		}
+
+		pre {
+			margin: 0;
+			padding: 15px;
+			/* FIX SCROLL MOBILE */
+			white-space: pre-wrap !important;
+			word-break: break-all !important;
+
+			code {
+				color: #d4d4d4;
+				font-family: 'Consolas', monospace;
+			}
+		}
 	}
 }
