@@ -8,13 +8,12 @@ import {
 import {
 	PanelBody,
 	SelectControl,
-	Button
+	Button,
+	ButtonGroup // Nuevo componente para agrupar botones
 } from '@wordpress/components';
 
 export default function Edit( { attributes, setAttributes } ) {
 	const { tabs, activeTabIndex } = attributes;
-
-	// useBlockProps inyecta la clase .wp-block-triskelion-code-console automáticamente
 	const blockProps = useBlockProps( { className: 'tk-console-admin' } );
 
 	const updateTab = ( key, value, index ) => {
@@ -39,31 +38,72 @@ export default function Edit( { attributes, setAttributes } ) {
 		setAttributes( { tabs: newTabs, activeTabIndex: Math.max( 0, newIndex ) } );
 	};
 
+	// Función para mover pestañas
+	const moveTab = ( direction ) => {
+		const newIndex = direction === 'up' ? activeTabIndex - 1 : activeTabIndex + 1;
+
+		// Verificamos límites
+		if ( newIndex < 0 || newIndex >= tabs.length ) return;
+
+		const newTabs = [ ...tabs ];
+		// Intercambio de posiciones
+		[ newTabs[ activeTabIndex ], newTabs[ newIndex ] ] = [ newTabs[ newIndex ], newTabs[ activeTabIndex ] ];
+
+		setAttributes( {
+			tabs: newTabs,
+			activeTabIndex: newIndex // Seguimos a la pestaña movida
+		} );
+	};
+
 	return (
-		<div { ...blockProps }>
+		<div { ...useBlockProps() }>
 			<InspectorControls>
 				<PanelBody title={ __( 'Configuración de Pestaña', 'code-console' ) }>
 					<SelectControl
-						label={ __( 'Lenguaje', 'code-console' ) }
+						label={ __( 'Lenguaje' ) }
 						value={ tabs[ activeTabIndex ]?.language || 'javascript' }
 						options={ [
 							{ label: 'JavaScript', value: 'javascript' },
+							{ label: 'Java', value: 'java' },
 							{ label: 'PHP', value: 'php' },
 							{ label: 'Python', value: 'python' },
-							{ label: 'Java', value: 'java' },
 							{ label: 'CSS', value: 'css' },
-							{ label: 'HTML', value: 'html' },
-							{ label: 'Bash', value: 'bash' },
 						] }
 						onChange={ ( val ) => updateTab( 'language', val, activeTabIndex ) }
 					/>
+
+					<div style={ { marginBottom: '20px' } }>
+						<label className="components-base-control__label" style={ { display: 'block', marginBottom: '8px' } }>
+							{ __( 'Orden de pestaña' ) }
+						</label>
+						<ButtonGroup>
+							<Button
+								variant="secondary"
+								icon="arrow-up-alt2"
+								onClick={ () => moveTab( 'up' ) }
+								disabled={ activeTabIndex === 0 }
+								label={ __( 'Mover arriba/izquierda' ) }
+							/>
+							<Button
+								variant="secondary"
+								icon="arrow-down-alt2"
+								onClick={ () => moveTab( 'down' ) }
+								disabled={ activeTabIndex === tabs.length - 1 }
+								label={ __( 'Mover abajo/derecha' ) }
+							/>
+						</ButtonGroup>
+					</div>
+
+					<hr />
+
 					<Button
 						isDestructive
 						variant="link"
 						onClick={ () => removeTab( activeTabIndex ) }
 						disabled={ tabs.length <= 1 }
+						style={ { padding: 0 } }
 					>
-						{ __( 'Eliminar pestaña actual', 'code-console' ) }
+						{ __( 'Eliminar pestaña actual' ) }
 					</Button>
 				</PanelBody>
 			</InspectorControls>
@@ -74,10 +114,7 @@ export default function Edit( { attributes, setAttributes } ) {
 						<div key={ i } className={ `tk-tab-wrapper ${ activeTabIndex === i ? 'is-active' : '' }` }>
 							<button
 								className="tk-tab-select"
-								onClick={ ( e ) => {
-									e.preventDefault();
-									setAttributes( { activeTabIndex: i } );
-								} }
+								onClick={ ( e ) => { e.preventDefault(); setAttributes( { activeTabIndex: i } ); } }
 							>
 								<RichText
 									tagName="span"
@@ -89,13 +126,7 @@ export default function Edit( { attributes, setAttributes } ) {
 							</button>
 						</div>
 					) ) }
-					<Button
-						onClick={ addTab }
-						icon="plus"
-						isSmall
-						className="tk-add-tab-btn"
-						label={ __( 'Añadir Pestaña' ) }
-					/>
+					<Button onClick={ addTab } icon="plus" isSmall className="tk-add-tab-btn" />
 				</div>
 			</div>
 
