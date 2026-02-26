@@ -11,7 +11,12 @@
 		"tabs": {
 			"type": "array",
 			"default": [
-				{ "title": "index.js", "language": "javascript", "content": "" }
+				{
+					"title": "index.js",
+					"language": "javascript",
+					"content": "",
+					"tabPosition": 1
+				}
 			]
 		},
 		"activeTabIndex": {
