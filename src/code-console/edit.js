@@ -1,19 +1,21 @@
 import { __ } from '@wordpress/i18n';
 import {
 	useBlockProps,
+	RichText,
 	InspectorControls,
-	RichText
+	PlainText
 } from '@wordpress/block-editor';
 import {
 	PanelBody,
 	SelectControl,
-	Button,
-	Dashicon
+	Button
 } from '@wordpress/components';
-import './editor.scss';
 
 export default function Edit( { attributes, setAttributes } ) {
 	const { tabs, activeTabIndex } = attributes;
+
+	// useBlockProps inyecta la clase .wp-block-triskelion-code-console automáticamente
+	const blockProps = useBlockProps( { className: 'tk-console-admin' } );
 
 	const updateTab = ( key, value, index ) => {
 		const newTabs = [ ...tabs ];
@@ -22,33 +24,36 @@ export default function Edit( { attributes, setAttributes } ) {
 	};
 
 	const addTab = () => {
-		setAttributes( {
-			tabs: [ ...tabs, { title: 'file.txt', language: 'javascript', content: '' } ],
-			activeTabIndex: tabs.length
-		} );
+		const newTabs = [ ...tabs, {
+			title: '',
+			language: 'javascript',
+			content: ''
+		} ];
+		setAttributes( { tabs: newTabs, activeTabIndex: newTabs.length - 1 } );
 	};
 
 	const removeTab = ( index ) => {
+		if ( tabs.length <= 1 ) return;
 		const newTabs = tabs.filter( ( _, i ) => i !== index );
-		setAttributes( {
-			tabs: newTabs,
-			activeTabIndex: Math.max( 0, index - 1 )
-		} );
+		const newIndex = activeTabIndex >= newTabs.length ? newTabs.length - 1 : activeTabIndex;
+		setAttributes( { tabs: newTabs, activeTabIndex: Math.max( 0, newIndex ) } );
 	};
 
 	return (
-		<div { ...useBlockProps() }>
+		<div { ...blockProps }>
 			<InspectorControls>
 				<PanelBody title={ __( 'Configuración de Pestaña', 'code-console' ) }>
 					<SelectControl
 						label={ __( 'Lenguaje', 'code-console' ) }
-						value={ tabs[ activeTabIndex ]?.language }
+						value={ tabs[ activeTabIndex ]?.language || 'javascript' }
 						options={ [
 							{ label: 'JavaScript', value: 'javascript' },
-							{ label: 'Java', value: 'java' },
 							{ label: 'PHP', value: 'php' },
 							{ label: 'Python', value: 'python' },
+							{ label: 'Java', value: 'java' },
 							{ label: 'CSS', value: 'css' },
+							{ label: 'HTML', value: 'html' },
+							{ label: 'Bash', value: 'bash' },
 						] }
 						onChange={ ( val ) => updateTab( 'language', val, activeTabIndex ) }
 					/>
@@ -63,34 +68,47 @@ export default function Edit( { attributes, setAttributes } ) {
 				</PanelBody>
 			</InspectorControls>
 
-			<div className="tk-console-admin">
-				<div className="tk-console-tabs-row">
+			<div className="tk-console-header">
+				<div className="tk-console-tabs-nav">
 					{ tabs.map( ( tab, i ) => (
-						<button
-							key={ i }
-							className={ `tk-tab-btn ${ activeTabIndex === i ? 'is-active' : '' }` }
-							onClick={ () => setAttributes( { activeTabIndex: i } ) }
-						>
-							<RichText
-								tagName="span"
-								value={ tab.title }
-								onChange={ ( val ) => updateTab( 'title', val, i ) }
-								placeholder={ __( 'nombre.ext', 'code-console' ) }
-							/>
-						</button>
+						<div key={ i } className={ `tk-tab-wrapper ${ activeTabIndex === i ? 'is-active' : '' }` }>
+							<button
+								className="tk-tab-select"
+								onClick={ ( e ) => {
+									e.preventDefault();
+									setAttributes( { activeTabIndex: i } );
+								} }
+							>
+								<RichText
+									tagName="span"
+									value={ tab.title }
+									onChange={ ( val ) => updateTab( 'title', val, i ) }
+									placeholder={ __( 'nombre.ext' ) }
+									allowedFormats={ [] }
+								/>
+							</button>
+						</div>
 					) ) }
-					<Button onClick={ addTab } className="add-tab-btn"><Dashicon icon="plus" /></Button>
-				</div>
-
-				<div className="tk-console-content-edit">
-					<RichText
-						tagName="pre"
-						value={ tabs[ activeTabIndex ]?.content }
-						onChange={ ( val ) => updateTab( 'content', val, activeTabIndex ) }
-						placeholder={ __( 'Pega tu código aquí...', 'code-console' ) }
-						preserveWhiteSpace={ true }
+					<Button
+						onClick={ addTab }
+						icon="plus"
+						isSmall
+						className="tk-add-tab-btn"
+						label={ __( 'Añadir Pestaña' ) }
 					/>
 				</div>
+			</div>
+
+			<div className="tk-console-body">
+				<div className="tk-admin-lang-indicator">
+					{ (tabs[ activeTabIndex ]?.language || 'js').toUpperCase() }
+				</div>
+				<PlainText
+					value={ tabs[ activeTabIndex ]?.content }
+					onChange={ ( val ) => updateTab( 'content', val, activeTabIndex ) }
+					placeholder={ __( '// Pega tu código aquí...' ) }
+					className="tk-code-plain-area"
+				/>
 			</div>
 		</div>
 	);

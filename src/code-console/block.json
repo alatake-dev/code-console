@@ -2,11 +2,11 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
 	"name": "triskelion/code-console",
-	"version": "1.0.0",
+	"version": "0.1.1",
 	"title": "Code Console",
-	"category": "formatting",
+	"category": "widgets",
 	"icon": "terminal",
-	"description": "Terminal con pestañas para documentación técnica.",
+	"description": "Consola de código con pestañas y tracking GTM.",
 	"attributes": {
 		"tabs": {
 			"type": "array",
@@ -14,22 +14,26 @@
 				{
 					"title": "index.js",
 					"language": "javascript",
-					"content": "",
-					"tabPosition": 1
+					"content": ""
 				}
 			]
 		},
 		"activeTabIndex": {
 			"type": "number",
 			"default": 0
+		},
+		"anchor": {
+			"type": "string"
 		}
 	},
 	"supports": {
-		"html": false,
-		"anchor": true
+		"anchor": true,
+		"html": false
 	},
+	"textdomain": "code-console",
 	"editorScript": "file:./index.js",
-	"editorStyle": "file:./editor.css",
+	"editorStyle": "file:./index.css",
 	"style": "file:./style-index.css",
+	"viewScript": "file:./view.js",
 	"render": "file:./render.php"
 }

@@ -1,9 +1,67 @@
-/**
- * The following styles get applied inside the editor only.
- *
- * Replace them with your own styles or remove the file completely.
- */
+.wp-block-triskelion-code-console,
+.tk-console-admin {
+	border: 1px solid #ddd;
+	border-left: 5px solid #007cba !important;
+	background: #fff;
+	margin-bottom: 20px;
 
-.wp-block-create-block-code-console {
-	border: 1px dotted #f00;
+	.tk-console-header {
+		background: #f0f0f0;
+		display: flex;
+		align-items: center;
+		padding: 5px 10px;
+		border-bottom: 1px solid #ddd;
+
+		.tk-tab-wrapper {
+			margin-right: 4px;
+			background: #e0e0e0;
+			border-radius: 4px 4px 0 0;
+
+			&.is-active {
+				background: #007cba;
+				span { color: white !important; }
+			}
+
+			.tk-tab-select {
+				background: transparent;
+				border: none;
+				padding: 4px 10px;
+				cursor: pointer;
+				span { font-size: 12px; font-family: monospace; }
+			}
+		}
+	}
+
+	.tk-console-body {
+		background: #1e1e1e;
+		position: relative;
+
+		.tk-admin-lang-indicator {
+			position: absolute;
+			top: 10px;
+			right: 15px;
+			color: #555;
+			font-size: 10px;
+			font-weight: bold;
+			z-index: 10;
+		}
+
+		textarea.tk-code-plain-area {
+			width: 100% !important;
+			margin: 0 !important;
+			padding: 30px 20px 20px !important;
+			background: #1e1e1e !important;
+			color: #d4d4d4 !important;
+			font-family: 'Consolas', 'Monaco', monospace !important;
+			font-size: 14px !important;
+			line-height: 1.5 !important;
+			border: none !important;
+			min-height: 250px;
+			outline: none !important;
+			box-shadow: none !important;
+			tab-size: 4;
+			white-space: pre !important;
+			overflow-wrap: normal !important;
+		}
+	}
 }
