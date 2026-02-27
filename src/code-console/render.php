@@ -1,17 +1,16 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+/**
+ * Renderizado del bloque Code Console Pro
+ * Mantenemos la estructura de nodos idéntica a la versión funcional de 'develop'.
+ */
+$tabs = isset($attributes['tabs']) ? $attributes['tabs'] : [];
 
-$tabs = isset( $attributes['tabs'] ) ? $attributes['tabs'] : array();
-$block_alias = isset( $attributes['anchor'] ) ? $attributes['anchor'] : 'console';
-
-if ( empty( $tabs ) ) return;
-
-$wrapper_attributes = get_block_wrapper_attributes( array(
-	'class' => 'tk-console-wrapper',
-) );
+if (empty($tabs)) {
+	return '<div class="tk-console-placeholder">Agrega al menos una pestaña de código en el editor.</div>';
+}
 ?>
 
-<div <?php echo $wrapper_attributes; ?>>
+<div class="tk-console-wrapper wp-block-triskelion-code-console">
 	<div class="tk-console-header">
 		<div class="tk-console-dots">
 			<span class="tk-dot red"></span>
@@ -19,31 +18,42 @@ $wrapper_attributes = get_block_wrapper_attributes( array(
 			<span class="tk-dot green"></span>
 		</div>
 		<div class="tk-console-tabs-nav" role="tablist">
-			<?php foreach ( $tabs as $index => $tab ) : ?>
-				<button
-					class="tk-tab-item <?php echo 0 === $index ? 'is-active' : ''; ?>"
-					role="tab"
-					data-index="<?php echo $index; ?>"
-					data-alias="<?php echo esc_attr( $block_alias ); ?>"
-				>
-					<?php echo esc_html( ! empty( $tab['title'] ) ? $tab['title'] : 'archivo.txt' ); ?>
+			<?php foreach ($tabs as $index => $tab) : ?>
+				<button class="tk-tab-item <?php echo $index === 0 ? 'is-active' : ''; ?>"
+						role="tab"
+						data-index="<?php echo $index; ?>"
+						data-alias="console">
+					<?php echo esc_html($tab['fileName'] ?: 'untitled'); ?>
 				</button>
 			<?php endforeach; ?>
 		</div>
 	</div>
 
 	<div class="tk-console-body">
-		<?php foreach ( $tabs as $index => $tab ) : ?>
-			<div
-				class="tk-tab-content <?php echo 0 === $index ? 'is-active' : ''; ?>"
-				data-content-index="<?php echo $index; ?>"
-				style="<?php echo 0 !== $index ? 'display:none;' : ''; ?>"
-			>
-				<div class="tk-console-info">
-					<span class="tk-lang-badge"><?php echo esc_html( strtoupper( $tab['language'] ) ); ?></span>
+		<?php foreach ($tabs as $index => $tab) : ?>
+			<div class="tk-tab-content <?php echo $index === 0 ? 'is-active' : ''; ?>"
+				 data-content-index="<?php echo $index; ?>"
+				<?php echo $index !== 0 ? 'style="display:none;"' : ''; ?>>
+
+				<?php // Cirugía: Se elimina el div .tk-console-info para ganar espacio vertical ?>
+
+				<div class="tk-wrapper">
+					<div class="tk-nav">
+						<div class="tk-dots"></div>
+						<div class="tk-tab-list" style="display: none;"></div>
+					</div>
+					<div class="tk-outer-container">
+						<div class="tk-content active" style="display: block;">
+                            <pre class="language-<?php echo esc_attr($tab['language']); ?>" tabindex="0" data-terminal-init="true">
+                                <code class="language-<?php echo esc_attr($tab['language']); ?>">
+                                    <?php echo esc_html($tab['content']); ?>
+                                </code>
+                                <span class="tk-badge">CODE</span>
+                                <button class="tk-copy">Copy</button>
+                            </pre>
+						</div>
+					</div>
 				</div>
-				<?php /* IMPORTANTE: No puede haber espacios entre <code> y el PHP */ ?>
-				<pre><code class="language-<?php echo esc_attr( $tab['language'] ); ?>"><?php echo esc_html( $tab['content'] ); ?></code></pre>
 			</div>
 		<?php endforeach; ?>
 	</div>

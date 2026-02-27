@@ -1,12 +1,12 @@
-// 1. Variables de Identidad (Agnósticas)
+// Variables de entorno
 $term-bg: #1e1e1e;
 $term-header: #323232;
 $term-border: #333;
 $dot-red: #ff5f56;
 $dot-yellow: #ffbd2e;
 $dot-green: #27c93f;
+$accent-color: #f1c40f;
 
-// 2. Estilos del Contenedor Raíz
 .tk-console-wrapper.wp-block-triskelion-code-console {
 	margin: var(--space-m) 0;
 	width: 100%;
@@ -18,13 +18,12 @@ $dot-green: #27c93f;
 	flex-direction: column;
 	filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.4));
 
-	// Cabecera (Barra Mac + Tabs)
 	.tk-console-header {
 		background-color: $term-header;
 		display: flex;
 		align-items: center;
 		padding: 0 16px;
-		height: 45px;
+		height: 44px;
 		border-bottom: 1px solid #121212;
 
 		.tk-console-dots {
@@ -33,98 +32,81 @@ $dot-green: #27c93f;
 			margin-right: 20px;
 
 			.tk-dot {
-				width: 12px;
-				height: 12px;
-				border-radius: 50%;
-				&.red { background: $dot-red; }
-				&.yellow { background: $dot-yellow; }
-				&.green { background: $dot-green; }
+				width: 12px; height: 12px; border-radius: 50%; position: relative;
+				&.red { background-color: $dot-red; }
+				&.yellow { background-color: $dot-yellow; }
+				&.green { background-color: $dot-green; }
+
+				&::after {
+					content: ''; position: absolute; top: 2px; left: 3px;
+					width: 6px; height: 3px; background: rgba(255, 255, 255, 0.15); border-radius: 50%;
+				}
 			}
 		}
 
 		.tk-console-tabs-nav {
-			display: flex;
-			height: 100%;
+			display: flex; height: 100%;
 
 			.tk-tab-item {
-				background: transparent;
-				border: none;
-				color: #858585;
-				padding: 0 15px;
-				font-size: 13px;
-				cursor: pointer;
-				border-right: 1px solid rgba(0,0,0,0.2);
-				height: 100%;
-				transition: all 0.2s;
+				background: transparent; border: none; color: #858585; padding: 0 16px;
+				font-size: 12px; font-family: inherit; cursor: pointer;
+				border-right: 1px solid rgba(0, 0, 0, 0.2); height: 100%;
+				position: relative; transition: all 0.2s ease;
 
 				&.is-active {
-					background-color: $term-bg;
-					color: #fff;
+					background-color: $term-bg; color: #fff;
+					// Borde superior de pestaña activa
+					&::before {
+						content: ''; position: absolute; top: 0; left: 0; right: 0;
+						height: 2px; background-color: $accent-color;
+					}
 				}
-				&:hover:not(.is-active) {
-					background-color: rgba(255,255,255,0.05);
-				}
+				&:hover:not(.is-active) { background-color: rgba(255, 255, 255, 0.05); }
 			}
 		}
 	}
 
-	// Cuerpo de la terminal
 	.tk-console-body {
 		background-color: $term-bg !important;
 
 		.tk-tab-content {
 			background-color: $term-bg !important;
-			padding: 20px;
+			padding: 8px 20px 20px 20px; // Reducción quirúrgica del padding superior
+			display: none;
 
 			&.is-active { display: block; }
 
-			.tk-console-info {
-				margin-bottom: 10px;
-				.tk-lang-badge {
-					color: #555;
-					font-size: 10px;
-					font-weight: 700;
-					letter-spacing: 1px;
-				}
-			}
-
-			// Área de código y Prism
 			.tk-wrapper {
-				pre[class*="language-"] {
-					background: transparent !important;
-					margin: 0 !important;
-					padding: 0 !important;
-					border: none !important;
-					overflow: visible;
+				.tk-outer-container {
+					.tk-content {
+						pre[class*="language-"] {
+							background: transparent !important; margin: 0 !important;
+							padding: 0 !important; border: none !important;
+							position: relative; overflow: visible;
 
-					code {
-						background: transparent !important;
-						font-family: SFMono-Regular, Consolas, monospace;
-						font-size: 14px;
-						line-height: 1.6;
+							code {
+								background: transparent !important;
+								font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+								font-size: 14px; line-height: 1.6; color: #d4d4d4;
+								text-shadow: none !important;
+							}
+
+							.tk-badge {
+								position: absolute; right: 65px; top: 5px;
+								color: #444; font-size: 10px; font-weight: bold; opacity: 0.6;
+							}
+
+							.tk-copy {
+								position: absolute; right: 0; top: 0;
+								background: #333; border: 1px solid #444; color: #ccc;
+								padding: 2px 8px; border-radius: 4px; font-size: 11px;
+								cursor: pointer; transition: all 0.2s;
+								&:hover { background: #444; color: #fff; }
+							}
+						}
 					}
 				}
 			}
 		}
 	}
-}
-
-// Botones de Copiar y Badges dentro del código
-.tk-copy {
-	background: #444;
-	color: #eee;
-	border: none;
-	padding: 4px 8px;
-	border-radius: 4px;
-	font-size: 11px;
-	cursor: pointer;
-	margin-left: 10px;
-	&:hover { background: #555; }
-}
-
-.tk-badge {
-	color: #666;
-	font-size: 10px;
-	margin-left: 10px;
-	font-weight: bold;
 }
