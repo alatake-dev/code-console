@@ -8,10 +8,9 @@ import {
 import {
 	PanelBody,
 	SelectControl,
+	__experimentalHStack as HStack,
 	Button,
-	ButtonGroup // Nuevo componente para agrupar botones
 } from '@wordpress/components';
-
 export default function Edit( { attributes, setAttributes } ) {
 	const { tabs, activeTabIndex } = attributes;
 	const blockProps = useBlockProps( { className: 'tk-console-admin' } );
@@ -54,7 +53,6 @@ export default function Edit( { attributes, setAttributes } ) {
 			activeTabIndex: newIndex // Seguimos a la pestaña movida
 		} );
 	};
-
 	return (
 		<div { ...blockProps }>
 			<InspectorControls>
@@ -65,7 +63,7 @@ export default function Edit( { attributes, setAttributes } ) {
 						options={ [
 							{ label: 'Bash', value: 'bash' },
 							{ label: 'CSS', value: 'css' },
-							{ label: 'HTML', value: 'markup' }, // Prism usa 'markup' para HTML
+							{ label: 'HTML', value: 'markup' },
 							{ label: 'Java', value: 'java' },
 							{ label: 'JavaScript', value: 'javascript' },
 							{ label: 'JSON', value: 'json' },
@@ -82,22 +80,24 @@ export default function Edit( { attributes, setAttributes } ) {
 						<label className="components-base-control__label" style={ { display: 'block', marginBottom: '8px' } }>
 							{ __( 'Orden de pestaña' ) }
 						</label>
-						<ButtonGroup>
+						<HStack justify="flex-start" spacing={ 2 }>
 							<Button
 								variant="secondary"
 								icon="arrow-up-alt2"
 								onClick={ () => moveTab( 'up' ) }
 								disabled={ activeTabIndex === 0 }
-								label={ __( 'Mover arriba/izquierda' ) }
+								label={ __( 'Mover arriba' ) }
+								showTooltip // Esto hace que aparezca el cartelito al pasar el mouse
 							/>
 							<Button
 								variant="secondary"
 								icon="arrow-down-alt2"
 								onClick={ () => moveTab( 'down' ) }
 								disabled={ activeTabIndex === tabs.length - 1 }
-								label={ __( 'Mover abajo/derecha' ) }
+								label={ __( 'Mover abajo' ) }
+								showTooltip
 							/>
-						</ButtonGroup>
+						</HStack>
 					</div>
 
 					<hr />
@@ -114,13 +114,24 @@ export default function Edit( { attributes, setAttributes } ) {
 				</PanelBody>
 			</InspectorControls>
 
-			<div className="tk-console-header">
-				<div className="tk-console-tabs-nav">
-					{ tabs.map( ( tab, i ) => (
-						<div key={ i } className={ `tk-tab-wrapper ${ activeTabIndex === i ? 'is-active' : '' }` }>
+			{/* ESTRUCTURA VISUAL SINCRONIZADA CON EL FRONT */}
+			<div className="tk-console-wrapper wp-block-triskelion-code-console">
+				<div className="tk-console-header">
+					<div className="tk-console-dots">
+						<span className="tk-dot red"></span>
+						<span className="tk-dot yellow"></span>
+						<span className="tk-dot green"></span>
+					</div>
+
+					<div className="tk-console-tabs-nav">
+						{ tabs.map( ( tab, i ) => (
 							<button
-								className="tk-tab-select"
-								onClick={ ( e ) => { e.preventDefault(); setAttributes( { activeTabIndex: i } ); } }
+								key={ i }
+								className={ `tk-tab-item ${ activeTabIndex === i ? 'is-active' : '' }` }
+								onClick={ ( e ) => {
+									e.preventDefault();
+									setAttributes( { activeTabIndex: i } );
+								} }
 							>
 								<RichText
 									tagName="span"
@@ -130,22 +141,45 @@ export default function Edit( { attributes, setAttributes } ) {
 									allowedFormats={ [] }
 								/>
 							</button>
-						</div>
-					) ) }
-					<Button onClick={ addTab } icon="plus" isSmall className="tk-add-tab-btn" />
+						) ) }
+						<Button
+							onClick={ addTab }
+							icon="plus"
+							isSmall
+							className="tk-add-tab-btn"
+							style={{ marginLeft: '10px', alignSelf: 'center' }}
+						/>
+					</div>
 				</div>
-			</div>
 
-			<div className="tk-console-body">
-				<div className="tk-admin-lang-indicator">
-					{ (tabs[ activeTabIndex ]?.language || 'js').toUpperCase() }
+				<div className="tk-console-body">
+					<div className="tk-tab-content is-active">
+						<div className="tk-wrapper">
+							{/* Mantenemos tk-nav y dots internos si existen en el front */}
+							<div className="tk-nav">
+								<div className="tk-dots"></div>
+							</div>
+
+							<div className="tk-outer-container">
+								<div className="tk-content active">
+                                <pre className={ `language-${ tabs[ activeTabIndex ]?.language || 'javascript' }` }>
+                                    <code>
+                                        <PlainText
+											value={ tabs[ activeTabIndex ]?.content }
+											onChange={ ( val ) => updateTab( 'content', val, activeTabIndex ) }
+											placeholder={ __( '// Pega tu código aquí...' ) }
+											className="tk-code-plain-area"
+										/>
+                                    </code>
+                                    <span className="tk-badge">
+                                        { (tabs[ activeTabIndex ]?.language || 'js').toUpperCase() }
+                                    </span>
+                                </pre>
+								</div>
+							</div>
+						</div>
+					</div>
 				</div>
-				<PlainText
-					value={ tabs[ activeTabIndex ]?.content }
-					onChange={ ( val ) => updateTab( 'content', val, activeTabIndex ) }
-					placeholder={ __( '// Pega tu código aquí...' ) }
-					className="tk-code-plain-area"
-				/>
 			</div>
 		</div>
 	);

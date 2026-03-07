@@ -1,60 +1,40 @@
 <?php
 /**
  * Renderizado del bloque Code Console Pro
- * Rama: fix/frontend
+ * Versión: Simplificada (Single Terminal View)
  */
 
 $tabs = isset($attributes['tabs']) ? $attributes['tabs'] : [];
 
-// Si no hay pestañas, mostramos un mensaje o retornamos vacío para no romper el layout
 if (empty($tabs)) {
 	return '<div class="tk-console-placeholder">Agrega al menos una pestaña de código en el editor.</div>';
 }
 ?>
-
 <div class="tk-console-wrapper wp-block-triskelion-code-console">
 	<div class="tk-console-header">
 		<div class="tk-console-dots">
-			<span class="tk-dot red"></span>
-			<span class="tk-dot yellow"></span>
-			<span class="tk-dot green"></span>
+			<span class="tk-dot red"></span><span class="tk-dot yellow"></span><span class="tk-dot green"></span>
 		</div>
-		<div class="tk-console-tabs-nav" role="tablist">
+		<div class="tk-console-tabs-nav">
 			<?php foreach ($tabs as $index => $tab) : ?>
-				<button class="tk-tab-item <?php echo $index === 0 ? 'is-active' : ''; ?>"
-						role="tab"
-						data-index="<?php echo $index; ?>"
-						data-alias="console">
-					<?php echo esc_html($tab['fileName'] ?: 'untitled'); ?>
+				<button class="tk-tab-item <?php echo $index === 0 ? 'is-active' : ''; ?>" data-index="<?php echo $index; ?>">
+					<?php echo esc_html($tab['title'] ?: 'untitled'); ?>
 				</button>
 			<?php endforeach; ?>
 		</div>
+		<div class="tk-console-actions">
+			<span class="tk-lang-badge" id="tk-current-lang"><?php echo esc_html(strtoupper($tabs[0]['language'])); ?></span>
+			<button class="tk-copy-btn" aria-label="Copy code">
+				<svg class="tk-copy-icon" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+				<svg class="tk-check-icon" viewBox="0 0 24 24" width="16" height="16" style="display:none;"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+			</button>
+		</div>
 	</div>
-
 	<div class="tk-console-body">
 		<?php foreach ($tabs as $index => $tab) : ?>
-			<div class="tk-tab-content <?php echo $index === 0 ? 'is-active' : ''; ?>"
-				 data-content-index="<?php echo $index; ?>"
-				<?php echo $index !== 0 ? 'style="display:none;"' : ''; ?>>
-
-				<div class="tk-wrapper">
-					<?php // Estructura necesaria para la terminal interna y Prism.js ?>
-					<div class="tk-nav">
-						<div class="tk-dots"></div>
-						<div class="tk-tab-list" style="display: none;"></div>
-					</div>
-
-					<div class="tk-outer-container">
-						<div class="tk-content active" style="display: block;">
-                            <pre class="language-<?php echo esc_attr($tab['language']); ?>" tabindex="0" data-terminal-init="true">
-                                <code class="language-<?php echo esc_attr($tab['language']); ?>">
-                                    <?php echo esc_html($tab['content']); ?>
-                                </code>
-                                <span class="tk-badge">CODE</span>
-                                <button class="tk-copy">Copy</button>
-                            </pre>
-						</div>
-					</div>
+			<div class="tk-tab-content <?php echo $index === 0 ? 'is-active' : ''; ?>" data-content-index="<?php echo $index; ?>" <?php echo $index !== 0 ? 'style="display:none;"' : ''; ?>>
+				<div class="tk-code-container">
+					<pre class="language-<?php echo esc_attr($tab['language']); ?>"><code class="language-<?php echo esc_attr($tab['language']); ?>"><?php echo esc_html($tab['content']); ?></code></pre>
 				</div>
 			</div>
 		<?php endforeach; ?>

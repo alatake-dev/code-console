@@ -1,70 +1,62 @@
-/**
- * Script de Front-end para Code Console.
- */
 document.addEventListener('DOMContentLoaded', () => {
-	const containers = document.querySelectorAll('.tk-console-wrapper');
+	// Usamos delegación de eventos para manejar N consolas con un solo listener
+	document.body.addEventListener('click', (e) => {
 
-	containers.forEach((container) => {
-		const tabs = container.querySelectorAll('.tk-tab-item');
-		const contents = container.querySelectorAll('.tk-tab-content');
+		// --- 1. LÓGICA DE PESTAÑAS ---
+		if (e.target.classList.contains('tk-tab-item')) {
+			const tab = e.target;
+			const consoleWrapper = tab.closest('.tk-console-wrapper');
+			const index = tab.getAttribute('data-index');
+			const langBadge = consoleWrapper.querySelector('#tk-current-lang');
 
-		tabs.forEach((tab) => {
-			tab.addEventListener('click', () => {
-				const targetIndex = tab.getAttribute('data-index');
+			// Resetear pestañas activas
+			consoleWrapper.querySelectorAll('.tk-tab-item').forEach(t => t.classList.remove('is-active'));
+			tab.classList.add('is-active');
 
-				// 1. Gestionar clases activas en pestañas
-				tabs.forEach(t => t.classList.remove('is-active'));
-				tab.classList.add('is-active');
+			// Intercambiar contenido
+			consoleWrapper.querySelectorAll('.tk-tab-content').forEach(content => {
+				if (content.getAttribute('data-content-index') === index) {
+					content.style.display = 'block';
+					content.classList.add('is-active');
 
-				// 2. Gestionar visibilidad de contenidos
-				contents.forEach((content) => {
-					if (content.getAttribute('data-content-index') === targetIndex) {
-						content.style.display = 'block';
-						content.classList.add('is-active');
-					} else {
-						content.style.display = 'none';
-						content.classList.remove('is-active');
-					}
-				});
-
-				// 3. DISPARAR EVENTO PARA GTM (DataLayer)
-				// Usamos los data-attributes que definimos en render.php
-				if (window.dataLayer) {
-					window.dataLayer.push({
-						'event': tab.getAttribute('data-gtm-event'),
-						'category': tab.getAttribute('data-gtm-category'),
-						'action': 'tab_switch',
-						'label': tab.getAttribute('data-gtm-tab-label'),
-						'tab_pos': tab.getAttribute('data-gtm-tab-position'),
-						'block_alias': tab.getAttribute('data-gtm-block-alias'),
-						'post_title': tab.getAttribute('data-gtm-post-title'),
-						'language': tab.getAttribute('data-gtm-lang')
-					});
-				}
-			});
-		});
-
-		// Lógica para el botón de Copiar
-		const copyButtons = container.querySelectorAll('.tk-copy-btn');
-		copyButtons.forEach((btn) => {
-			btn.addEventListener('click', () => {
-				const activeContent = container.querySelector('.tk-tab-content.is-active code');
-				if (activeContent) {
-					navigator.clipboard.writeText(activeContent.innerText).then(() => {
-						const originalText = btn.innerText;
-						btn.innerText = '¡Copiado!';
-						setTimeout(() => btn.innerText = originalText, 2000);
-
-						// Evento GTM para Copiar
-						if (window.dataLayer) {
-							window.dataLayer.push({
-								'event': 'code_copy',
-								'block_alias': btn.getAttribute('data-gtm-block-alias')
-							});
+					// Actualizar el Badge del Header (Cerebro)
+					const pre = content.querySelector('pre');
+					if (pre && langBadge) {
+						const langClass = Array.from(pre.classList).find(c => c.startsWith('language-'));
+						if (langClass) {
+							const langName = langClass.replace('language-', '').toUpperCase();
+							langBadge.textContent = langName;
 						}
-					});
+					}
+				} else {
+					content.style.display = 'none';
+					content.classList.remove('is-active');
 				}
 			});
-		});
+		}
+
+		// --- 2. LÓGICA DE COPIADO (Botón Interno) ---
+		if (e.target.classList.contains('tk-copy-btn')) {
+			const btn = e.target;
+			// Buscamos el bloque de código hermano dentro del contenedor
+			const container = btn.closest('.tk-code-container');
+			const codeBlock = container ? container.querySelector('code') : null;
+
+			if (codeBlock) {
+				const text = codeBlock.innerText.trim();
+				navigator.clipboard.writeText(text).then(() => {
+					const originalText = btn.textContent;
+					btn.textContent = 'Copied!';
+					btn.classList.add('copied');
+
+					setTimeout(() => {
+						btn.textContent = originalText;
+						btn.classList.remove('copied');
+					}, 2000);
+				}).catch(err => {
+					console.error('Error al copiar: ', err);
+				});
+			}
+		}
 	});
 });
