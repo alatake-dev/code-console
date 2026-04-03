@@ -16,6 +16,10 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-assets.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-block-registry.php';
+
 /**
  * Registers the block(s) metadata from the `blocks-manifest.php` and registers the block type(s)
  * based on the registered block metadata. Behind the scenes, it registers also all assets so they can be enqueued
@@ -24,7 +28,22 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @see https://make.wordpress.org/core/2025/03/13/more-efficient-block-type-registration-in-6-8/
  * @see https://make.wordpress.org/core/2024/10/17/new-block-type-registration-apis-to-improve-performance-in-wordpress-6-7/
  */
-function triskelion_code_console_block_init() {
-	wp_register_block_types_from_metadata_collection( __DIR__ . '/build', __DIR__ . '/build/blocks-manifest.php' );
-}
-add_action( 'init', 'triskelion_code_console_block_init' );
+
+
+spl_autoload_register(function ($class) {
+	$prefix = 'Triskelion\\CodeConsole\\';
+	$base_dir = __DIR__ . '/includes/';
+
+	$len = strlen($prefix);
+	if (strncmp($prefix, $class, $len) !== 0) return;
+
+	$relative_class = substr($class, $len);
+	$file = $base_dir . 'class-' . str_replace('\\', '/', strtolower($relative_class)) . '.php';
+
+	if (file_exists($file)) {
+		require $file;
+	}
+});
+
+\Triskelion\CodeConsole\Assets::init();
+\Triskelion\CodeConsole\Block_Registry::init();
