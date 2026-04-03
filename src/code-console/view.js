@@ -1,62 +1,73 @@
+/**
+ * Triskelion Code Console - Frontend Logic (Modern Standards)
+ */
+
 document.addEventListener('DOMContentLoaded', () => {
-	// Usamos delegación de eventos para manejar N consolas con un solo listener
+
+	if (!document.querySelector('.tk-console-wrapper')) return;
+
+	// 1. Manejo de Pestañas (Tabs)
 	document.body.addEventListener('click', (e) => {
+		const tabBtn = e.target.closest('.tk-tab-item');
+		if (!tabBtn) return;
 
-		// --- 1. LÓGICA DE PESTAÑAS ---
-		if (e.target.classList.contains('tk-tab-item')) {
-			const tab = e.target;
-			const consoleWrapper = tab.closest('.tk-console-wrapper');
-			const index = tab.getAttribute('data-index');
-			const langBadge = consoleWrapper.querySelector('#tk-current-lang');
+		const wrapper = tabBtn.closest('.tk-console-wrapper');
+		const index = tabBtn.dataset.index;
 
-			// Resetear pestañas activas
-			consoleWrapper.querySelectorAll('.tk-tab-item').forEach(t => t.classList.remove('is-active'));
-			tab.classList.add('is-active');
+		// Desactivar tabs y contenidos previos
+		wrapper.querySelectorAll('.tk-tab-item').forEach(btn => btn.classList.remove('is-active'));
+		wrapper.querySelectorAll('.tk-tab-content').forEach(content => {
+			content.classList.remove('is-active');
+			content.style.display = 'none';
+		});
 
-			// Intercambiar contenido
-			consoleWrapper.querySelectorAll('.tk-tab-content').forEach(content => {
-				if (content.getAttribute('data-content-index') === index) {
-					content.style.display = 'block';
-					content.classList.add('is-active');
+		// Activar tab seleccionada
+		tabBtn.classList.add('is-active');
+		const activeContent = wrapper.querySelector(`.tk-tab-content[data-content-index="${index}"]`);
+		if (activeContent) {
+			activeContent.classList.add('is-active');
+			activeContent.style.display = 'block';
 
-					// Actualizar el Badge del Header (Cerebro)
-					const pre = content.querySelector('pre');
-					if (pre && langBadge) {
-						const langClass = Array.from(pre.classList).find(c => c.startsWith('language-'));
-						if (langClass) {
-							const langName = langClass.replace('language-', '').toUpperCase();
-							langBadge.textContent = langName;
-						}
-					}
-				} else {
-					content.style.display = 'none';
-					content.classList.remove('is-active');
-				}
-			});
+			// Actualizar Badge de lenguaje
+			const badge = wrapper.querySelector('#tk-current-lang');
+			const codeElem = activeContent.querySelector('code');
+			if (badge && codeElem) {
+				const langMatch = codeElem.className.match(/language-(\w+)/);
+				if (langMatch) badge.textContent = langMatch[1].toUpperCase();
+			}
 		}
+	});
 
-		// --- 2. LÓGICA DE COPIADO (Botón Interno) ---
-		if (e.target.classList.contains('tk-copy-btn')) {
-			const btn = e.target;
-			// Buscamos el bloque de código hermano dentro del contenedor
-			const container = btn.closest('.tk-code-container');
-			const codeBlock = container ? container.querySelector('code') : null;
+	// 2. Manejo del Botón de Copia (Clipboard API)
+	document.body.addEventListener('click', async (e) => {
+		const copyBtn = e.target.closest('.tk-copy-btn');
+		if (!copyBtn) return;
 
-			if (codeBlock) {
-				const text = codeBlock.innerText.trim();
-				navigator.clipboard.writeText(text).then(() => {
-					const originalText = btn.textContent;
-					btn.textContent = 'Copied!';
-					btn.classList.add('copied');
+		e.preventDefault();
 
-					setTimeout(() => {
-						btn.textContent = originalText;
-						btn.classList.remove('copied');
-					}, 2000);
-				}).catch(err => {
-					console.error('Error al copiar: ', err);
-				});
+		const wrapper = copyBtn.closest('.tk-console-wrapper');
+		const activeCode = wrapper.querySelector('.tk-tab-content.is-active code');
+
+		if (activeCode) {
+			// navigator.clipboard es el estándar actual (requiere HTTPS o localhost)
+			const textToCopy = (activeCode.innerText || activeCode.textContent).trim();
+
+			try {
+				await navigator.clipboard.writeText(textToCopy);
+
+				// Feedback visual: Éxito
+				copyBtn.classList.add('copied');
+				setTimeout(() => copyBtn.classList.remove('copied'), 2000);
+
+			} catch (err) {
+				// Si falla (ej. contexto no seguro), al menos lo logueamos
+				console.error('La Clipboard API falló. Verifica que estés en HTTPS.', err);
+
+				// Un pequeño "shout-out" visual de error si quieres
+				copyBtn.style.color = '#ff5f56';
+				setTimeout(() => copyBtn.style.color = '', 2000);
 			}
 		}
 	});
 });
+
